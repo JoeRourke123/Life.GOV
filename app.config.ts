@@ -28,6 +28,9 @@ export default ({ config }: { config: ExpoConfig }): ExpoConfig => ({
   },
   web: {
     favicon: './assets/favicon.png',
+    // 'static' prerenders every route to HTML (+ 404.html), so deep links work
+    // on GitHub Pages, which has no SPA fallback. SDK 58 defaults to 'single'.
+    output: 'static',
   },
   plugins: ['expo-router'],
   experiments: {
