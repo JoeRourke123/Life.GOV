@@ -1,0 +1,159 @@
+/* Life.GOV — v3 "Hansard Press" design system
+   Reference: UK official print — Hansard, election notices, division records.
+   Anti-slop rules (enforced):
+   - no cards, no shadows, no gradients, no border-radius, no glass, no glow
+   - structure = hairline rules, tables, whitespace, ink density
+   - two type voices only: the paper (serif) and the record (mono)
+   - red = the despatch box and stamps; green = the ayes; ochre = assent
+   - consequences are recorded, never nagged */
+
+@font-face { font-family: 'STIX Two Text'; font-weight: 400; src: url('../fonts/STIXTwoText-400.ttf'); }
+@font-face { font-family: 'STIX Two Text'; font-weight: 600; src: url('../fonts/STIXTwoText-600.ttf'); }
+@font-face { font-family: 'STIX Two Text'; font-weight: 700; src: url('../fonts/STIXTwoText-700.ttf'); }
+@font-face { font-family: 'STIX Two Text'; font-style: italic; font-weight: 400; src: url('../fonts/STIXTwoText-400i.ttf'); }
+@font-face { font-family: 'IBM Plex Mono'; font-weight: 400; src: url('../fonts/IBMPlexMono-400.ttf'); }
+@font-face { font-family: 'IBM Plex Mono'; font-weight: 500; src: url('../fonts/IBMPlexMono-500.ttf'); }
+@font-face { font-family: 'IBM Plex Mono'; font-weight: 600; src: url('../fonts/IBMPlexMono-600.ttf'); }
+@font-face { font-family: 'Hanken Grotesk'; font-weight: 700; src: url('../fonts/HankenGrotesk-700.ttf'); }
+
+:root {
+  --paper: #f6f3ea;
+  --paper-2: #efebe0;
+  --ink: #1d1a15;
+  --ink-2: #57524a;
+  --ink-3: #8f887a;
+  --rule: #d9d3c2;
+  --rule-strong: #1d1a15;
+  --red: #a12c1c;
+  --ochre: #8a6c1e;
+  --green: #2f5e44;
+  --serif: 'STIX Two Text', Georgia, 'Times New Roman', serif;
+  --mono: 'IBM Plex Mono', Menlo, monospace;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: #101010; font-family: var(--serif); color: var(--ink); -webkit-font-smoothing: antialiased; }
+
+.phone {
+  width: 390px; height: 844px; background: var(--paper);
+  border-radius: 46px; border: 1px solid #000;
+  box-shadow: 0 0 0 10px #1a1c20, 0 0 0 11px #383b42, 0 30px 60px rgba(0,0,0,.55);
+  position: relative; overflow: hidden; flex-shrink: 0;
+}
+.phone::before {
+  content: ''; position: absolute; top: 11px; left: 50%; transform: translateX(-50%);
+  width: 118px; height: 32px; background: #000; border-radius: 18px; z-index: 60;
+}
+
+/* ---------- status bar (ink on paper) ---------- */
+.statusbar {
+  height: 54px; display: flex; align-items: flex-end; justify-content: space-between;
+  padding: 0 30px 6px; font-family: var(--mono); font-weight: 500; font-size: 13px;
+  position: relative; z-index: 50; color: var(--ink);
+}
+.statusbar .icons { display: flex; align-items: center; gap: 6px; }
+.batt { width: 23px; height: 11.5px; border: 1.4px solid var(--ink); border-radius: 2.5px; position: relative; }
+.batt::before { content:''; position:absolute; inset:1.6px; width: 70%; background: var(--ink); border-radius: 1px; }
+.batt::after { content:''; position:absolute; right:-4px; top:3px; width:2px; height:5px; background: var(--ink); border-radius: 0 1px 1px 0; }
+
+/* ---------- layout ---------- */
+.app { padding: 0 22px; position: relative; z-index: 10; }
+
+/* masthead: caps line, serif title, double rule */
+.mast-caps { font-family: var(--mono); font-size: 10px; letter-spacing: .22em; color: var(--ink-2); text-transform: uppercase; }
+.mast-title { font-family: var(--serif); font-weight: 700; letter-spacing: .01em; }
+.rule-double { border-top: 2.5px solid var(--rule-strong); border-bottom: 1px solid var(--rule-strong); height: 5px; }
+.rule-thick { height: 2.5px; background: var(--rule-strong); }
+.rule-thin { height: 1px; background: var(--rule); }
+.rule-ink { height: 1px; background: var(--rule-strong); }
+
+/* slug: centered small caps between em rules */
+.slug {
+  display: flex; align-items: center; gap: 10px;
+  font-family: var(--mono); font-size: 10.5px; font-weight: 600; letter-spacing: .2em;
+  text-transform: uppercase; color: var(--ink-2);
+}
+.slug::before, .slug::after { content: '—'; color: var(--ink-3); font-weight: 400; }
+
+/* folio: hairline sandwich */
+.folio {
+  display: flex; justify-content: space-between; padding: 5px 0;
+  border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule);
+  font-family: var(--mono); font-size: 10px; letter-spacing: .12em; color: var(--ink-3); text-transform: uppercase;
+}
+
+/* ---------- tables (the core component; replaces cards) ---------- */
+table.sheet { width: 100%; border-collapse: collapse; }
+table.sheet th {
+  font-family: var(--mono); font-size: 9.5px; font-weight: 600; letter-spacing: .16em;
+  text-transform: uppercase; color: var(--ink-3); text-align: left;
+  padding: 4px 0 5px; border-bottom: 1px solid var(--rule-strong); font-weight: 600;
+}
+table.sheet td { padding: 9px 0; border-bottom: 1px solid var(--rule); vertical-align: top; }
+table.sheet tr:last-child td { border-bottom: none; }
+td.num { font-family: var(--serif); font-weight: 700; font-size: 15px; color: var(--ink-3); width: 26px; }
+td.title { font-family: var(--serif); font-size: 15px; font-weight: 600; line-height: 1.25; }
+td.meta { font-family: var(--mono); font-size: 10.5px; color: var(--ink-2); line-height: 1.5; text-align: right; white-space: nowrap; }
+
+/* ---------- actions: boxed mono verbs, like form fields ---------- */
+.act {
+  display: inline-flex; align-items: center; justify-content: center;
+  font-family: var(--mono); font-size: 11px; font-weight: 600; letter-spacing: .12em;
+  text-transform: uppercase; padding: 9px 14px; border: 1.5px solid var(--ink);
+  color: var(--ink); background: transparent; white-space: nowrap;
+}
+.act-primary { border-color: var(--red); background: var(--red); color: var(--paper); }
+.act-red { border-color: var(--red); color: var(--red); background: transparent; }
+.act-quiet { border-color: var(--ink-3); color: var(--ink-2); }
+.act-ghost { border: none; color: var(--ink-2); padding-left: 0; padding-right: 0; text-decoration: underline; text-underline-offset: 3px; }
+
+/* ---------- the division bar (approval) ---------- */
+.division { position: relative; height: 16px; }
+.division .ayes { position: absolute; inset: 0 auto 0 0; background: var(--green); }
+.division .noes {
+  position: absolute; inset: 0 0 0 auto;
+  background: repeating-linear-gradient(135deg, transparent 0 3px, rgba(161,44,28,.55) 3px 4.5px);
+  border-left: 1.5px solid var(--rule-strong);
+}
+.division .mark { position: absolute; top: -3px; bottom: -3px; width: 1.5px; background: var(--rule-strong); }
+
+/* ---------- rubber stamp ---------- */
+.stamp {
+  display: inline-block; font-family: var(--mono); font-weight: 600; font-size: 10px;
+  letter-spacing: .18em; text-transform: uppercase; color: var(--red);
+  border: 2px solid var(--red); padding: 4px 8px 3px; transform: rotate(-4deg);
+  opacity: .85; border-radius: 2px; box-shadow: inset 0 0 0 1px rgba(161,44,28,.35);
+}
+.stamp.ochre { color: var(--ochre); border-color: var(--ochre); box-shadow: inset 0 0 0 1px rgba(138,108,30,.35); }
+
+/* ---------- writ notice (black-bordered official announcement) ---------- */
+.writ { border: 3px solid var(--rule-strong); outline: 1px solid var(--rule-strong); outline-offset: 3px; padding: 14px 16px; text-align: center; }
+
+/* ---------- record (hansard) ---------- */
+.record { font-family: var(--mono); font-size: 11px; line-height: 1.9; color: var(--ink-2); }
+.record .t { color: var(--ink-3); }
+
+/* ---------- drop cap ---------- */
+.dropcap::first-letter {
+  font-family: var(--serif); font-weight: 700; font-size: 46px; line-height: .82;
+  float: left; padding: 4px 8px 0 0; color: var(--red);
+}
+
+/* ---------- tab bar: text-only, small caps ---------- */
+.tabbar {
+  position: absolute; left: 0; right: 0; bottom: 0; height: 78px; z-index: 40;
+  background: var(--paper); border-top: 2.5px solid var(--rule-strong);
+  display: flex; align-items: flex-start; padding: 12px 10px 0;
+}
+.tab {
+  flex: 1; text-align: center; font-family: var(--mono); font-size: 9.5px; font-weight: 600;
+  letter-spacing: .1em; text-transform: uppercase; color: var(--ink-3); padding-top: 8px;
+}
+.tab.on { color: var(--ink); border-top: 3px solid var(--red); margin-top: -3px; padding-top: 8px; }
+
+/* ---------- misc ---------- */
+.mono { font-family: var(--mono); }
+.serif { font-family: var(--serif); }
+.i { font-style: italic; }
+.c-ink2 { color: var(--ink-2); } .c-ink3 { color: var(--ink-3); }
+.c-red { color: var(--red); } .c-green { color: var(--green); } .c-ochre { color: var(--ochre); }
