@@ -2,233 +2,170 @@
 
 **Tagline:** Run your life like a government.
 
-Life.GOV is a React Router app that turns personal productivity into a game. You are the head of state of your own life: tasks are legislation, habits are standing policy, streaks are your approval rating, and your life areas are ministries with budgets and levels.
+Life.GOV is a mobile-first life-management app where you govern your own life as a British government. Tasks are legislation, habits are standing orders, streaks are your approval rating, and your life areas are Cabinet ministers. The tone is deadpan — Yes Minister, not pantomime.
 
-Status: v0.1 — pre-implementation design. This document is the source of truth for the MVP.
+Status: v0.2 — brainstormed and agreed design, pre-implementation. This document is the source of truth for the MVP.
 
 ---
 
-## 1. Vision
+## 1. Vision & pillars
 
-Make self-improvement feel like running a country. Instead of a bare todo list, the player sees a living government: a capitol dashboard with approval ratings, a legislative agenda of quests, ministries that level up, policies with tradeoffs, and random events that force decisions. Progress is visible, numbers go up, and neglect has consequences (approval decay).
+1. **A life system, not a toy.** This should genuinely help someone stay on top of their life — capture fast, plan the day, manage money and goals.
+2. **Everything is Westminster.** No generic todo language. Tasks are bills and statutory instruments, goals are manifesto pledges, history is Hansard, events are the Gazette.
+3. **Deadpan British humour throughout.** Civil-service obstruction, lobby scepticism, suspended sittings. Funny because it's dry, never slapstick.
+4. **Local-first, offline.** No account, no server in the MVP. State lives on the device.
+5. **Stakes without cruelty.** Neglect has consequences (approval decay, elections), but there is no game over and no save deletion.
+6. **Mobile first.** Built for Expo Go; quick to open, quick to act.
 
-## 2. Design pillars
+## 2. Tech stack
 
-1. **Everything is a government metaphor.** No generic "todo app" language in the UI. Tasks = bills, habits = standing orders, goals = amendments, currency = treasury.
-2. **Local-first, offline-capable.** The whole game runs in the browser with localStorage persistence. No account, no server in the MVP.
-3. **Deterministic daily content.** Daily quests/events are seeded per player per day, so the "news cycle" is stable within a day but different across days.
-4. **Small decisions, real tradeoffs.** Policies and events should cost something (currency, approval, or opportunity), not be free buffs.
-5. **Numbers go up, but decay keeps it honest.** Streaks and approval reward consistency; idle players see approval slide.
+- **React Native + Expo**, developed via **Expo Go** (Expo SDK core only: AsyncStorage / expo-sqlite / expo-notifications all available; no custom native modules).
+- **Expo Router** for file-based navigation — routes map 1:1 to screens below.
+- **Persistence:** AsyncStorage under key `lifegov.save.v1`, JSON with `version` + migration chain; export/import via share sheet.
+- **Notifications:** `expo-notifications` scheduled locally — midnight agenda, Wednesday 12:00 PMQs, election countdown, low-approval warnings.
+- **Home-screen widgets / quick-add shortcuts:** deferred — they require a native dev build, not Expo Go. Revisit post-MVP.
+- **Web:** Expo can export a web build later; the original React Router web idea is sequenced after mobile, not abandoned.
+- **Deterministic content:** `mulberry32` seeded RNG; daily/weekly content seeded per player per day/week.
 
-## 3. Core loop
+## 3. The Cabinet (life areas = ministers)
 
-- **Minute-to-minute:** complete a quest (bill passed) → earn XP + treasury → watch approval tick up.
-- **Session:** review the agenda, enact/repeal a policy, respond to an event, spend treasury in the shop.
-- **Day cycle:** at local midnight, daily quests rotate (seeded), upkeep is charged, approval decays if no quest was completed.
-- **Long-term:** level up, grow ministries, accumulate policies, reach the level cap, and start a **New Administration** (prestige) for a permanent bonus.
+Seven Cabinet posts, each a "ministry" with its own level and XP:
 
-## 4. Entities & data model
+| Post | Ministry area |
+|---|---|
+| Chancellor of the Exchequer | Money, budgeting, savings (HM Treasury) |
+| Home Secretary | Home, household, life admin |
+| Health Secretary | Fitness, sleep, health |
+| Education Secretary | Learning, skills, personal development |
+| Foreign Secretary | Social life, relationships, travel |
+| Business Secretary | Career and work projects |
+| Culture Secretary | Hobbies, arts, reading, entertainment |
 
-```ts
-interface SaveState {
-  version: number;                 // schema version, for migrations
-  createdAt: string;               // ISO date
-  seed: number;                    // player seed for deterministic content
-  player: {
-    name: string;
-    title: string;                 // e.g. "First Secretary", earned by level
-    level: number;
-    xp: number;
-    currency: number;              // treasury credits
-    approval: number;              // 0–100
-    streak: number;                // consecutive days with >=1 quest completed
-    bestStreak: number;
-    administration: number;        // prestige count
-  };
-  ministries: Record<MinistryId, { level: number; xp: number }>;
-  quests: QuestInstance[];        // active + recently completed
-  policies: PolicyInstance[];      // enacted standing orders
-  eventLog: EventLogEntry[];       // past events and chosen options
-  stats: {
-    questsCompleted: number;
-    eventsResolved: number;
-    currencyEarned: number;
-  };
-  lastDailyReset: string;          // ISO date of last midnight reset
-  settings: { sound: boolean; confirmReset: boolean };
-}
+Ministry level uses the same XP curve as the player. Each level grants **+2% rewards (XP and £) on quests tagged to that ministry**.
 
-type MinistryId = "health" | "wealth" | "mind" | "social";
+## 4. Task taxonomy — the three kinds of legislation
 
-interface QuestInstance {
-  id: string;
-  templateId: string;
-  title: string;                   // the "bill" title
-  description: string;
-  ministry: MinistryId;
-  difficulty: 1 | 2 | 3 | 4 | 5;   // stars
-  kind: "daily" | "weekly" | "one-off";
-  xpReward: number;
-  currencyReward: number;
-  status: "active" | "completed" | "failed" | "abandoned";
-  createdAt: string;
-  dueAt: string | null;            // end of day / end of week
-  completedAt: string | null;
-}
-
-interface PolicyInstance {
-  id: string;
-  policyId: string;                // from static policy catalog
-  enactedAt: string;
-  active: boolean;
-}
-
-interface EventLogEntry {
-  id: string;
-  eventId: string;
-  title: string;
-  choiceIndex: number;
-  resolvedAt: string;
-}
-```
-
-## 5. Mechanics
-
-### 5.1 XP & levels
-
-- `xpToNext(level) = round(80 * level^1.6)` — level 1→2 costs 80, level 5→6 costs ~1,254.
-- Completing a quest grants `xpReward = round(20 * difficulty * streakMultiplier * administrationBonus)`.
-- `streakMultiplier = 1 + min(streak, 30) * 0.02` (up to +60% at a 30-day streak).
-- `administrationBonus = 1 + 0.10 * administration` (prestige bonus).
-- Leveling up grants `currency += 25 * newLevel` as a "budget appropriation".
-
-### 5.2 Currency (treasury)
-
-- Quests grant `currencyReward = round(10 * difficulty * administrationBonus)`.
-- Spent in the Treasury shop on upgrades (see 5.8) and policy enactment costs.
-- Austerity-style policies can modify gains (tradeoff vs approval).
-
-### 5.3 Approval rating & streaks
-
-- Approval is 0–100, starts at 50.
-- Each quest completed: `+2` approval (daily cap `+8`).
-- Day with zero completed quests: `-6` approval and streak resets to 0.
-- Day with at least one completion: streak +1.
-- Some policies/events modify approval directly.
-- Approval gates certain shop items and high-difficulty weekly quests (e.g. 5-star weekly requires approval ≥ 70).
-
-### 5.4 Ministries
-
-Four ministries: **Health, Wealth, Mind, Social**. Quests are tagged with one. Completing a quest grants ministry XP equal to the quest's XP reward.
-
-- Ministry level uses the same curve as player XP.
-- Each ministry level grants a passive bonus: `+2%` quest rewards (XP & currency) for quests in that ministry, stacking with other multipliers.
-- Ministry level is shown with a progress bar and a flavor title (e.g. Health level 5 = "Minister of Vitality").
-
-### 5.5 Quests ("the legislative agenda")
-
-- **Daily bills:** 3 generated per day from a seeded template pool, difficulties 1–3, due end of day.
-- **Weekly bills:** 2 generated per week (ISO week), difficulties 3–5, due end of week. 5-star requires approval ≥ 70.
-- **One-off bills:** player-created custom quests (any difficulty, optional due date), plus milestone "amendments" (long-term goals) unlocked at higher levels.
-- **Generation:** `mulberry32(hash(seed, dateOrWeekString))` picks templates, difficulty, and ministry, so content is stable within a day/week but varies across them.
-- **Failure:** daily quests not completed by midnight are marked `failed` (no penalty beyond approval decay rules). Weekly likewise at week end.
-- **Abandon:** player may abandon an active quest; counts as neither completed nor failed for streak purposes but still counts against the daily approval decay if it was the only activity... (decided: abandoning does not protect the streak — only completion does.)
-
-### 5.6 Policies ("standing orders")
-
-Enacted from a static catalog; each has an enact cost (currency) and optional daily upkeep (currency or approval). Examples:
-
-| Policy | Cost | Upkeep | Effect |
+| Tier | Real-world task | Stars | How it's done |
 |---|---|---|---|
-| Early Riser | 150 | — | +10% XP from quests completed before 12:00 local |
-| No Zero Days | 200 | −1 approval/day | Approval cannot drop below 40 |
-| Austerity Measures | 100 | — | +25% currency from quests, approval gain halved |
-| Open Government | 250 | −5 currency/day | +1 approval per quest (instead of +2, plus events give +2 approval) |
-| Term Limits | 300 | — | Weekly quests grant +20% XP, but max active weekly quests reduced to 1 |
+| **Statutory instrument** (secondary legislation) | Small everyday task | 1–2 | One tap: *"laid before the House."* Instant rewards. |
+| **Private Members' Bill** | Medium personal project | 3 | 1–2 sittings through committee, then a division (vote). |
+| **Government Bill** | Big project / manifesto pledge | 4–5 | Full pipeline below; made of clauses, one clause per sitting. |
 
-Policies can be repealed (no refund). Active policies show on the dashboard.
+### The bill pipeline (Government Bills)
 
-### 5.7 Events ("cabinet crises & opportunities")
+`proposed → first reading → committee stage → third reading → Royal Assent`
 
-- Each day has a 60% chance of one event, seeded like quests.
-- An event presents 2–3 choices, each with explicit effects (e.g. "Fund the initiative: −50 currency, +5 approval" / "Ignore it: −4 approval").
-- Resolved events go to the event log; effects apply immediately.
-- Event catalog: ~20 templates covering scandals, opportunities, and ministry-specific crises.
+- **Clauses:** when drafting a Government Bill you set the title, assign the Cabinet minister, and choose **any number of clauses**. Each clause = one sitting. Clause count is the real effort: 12 clauses ≈ 12 × 25 min ≈ 5 hours.
+- **Stages advance automatically** as clauses complete: created = proposed; committed = first reading; clauses in progress = committee; all clauses done = third reading; final vote = Royal Assent → rewards paid, entry written to Hansard.
+- **Sittings:** timed focus sessions, default **25 minutes**, adjustable. One sitting completes one clause and pays a slice of the reward. If interrupted: the clause stays in committee — no reward, no penalty. *"The sitting was suspended."*
 
-### 5.8 Treasury shop
+### Daily content
 
-Spend currency on permanent upgrades, e.g.:
+- Each day generates a set of **daily statutory instruments** (seeded, 1–2 stars, due end of day).
+- **PMQs every Wednesday 12:00** — a push notification: *"You are called to the despatch box."* A high-difficulty question (3–5 star bill) appears; answering well gives a bonus.
+- Weekly: a couple of Private Members' Bills / bigger items, seeded per ISO week.
+- Player-created items of any tier at any time.
 
-- **Better Whip** (50 × level): +5% XP per level from all quests.
-- **Ministry Grant** (80 × level, per ministry): +1 starting level-equivalent bonus... simpler: +4% currency from that ministry's quests per level.
-- **Spin Doctor** (120 × level): +1 approval per quest per level.
-- **Emergency Fund** (200, one-time): once per administration, survive a zero-quest day without losing streak.
+## 5. Manifestos, terms & elections
 
-### 5.9 Day cycle (midnight reset)
+- **Writing a manifesto** starts a new term. You choose:
+  - **Pledges** — any number of Government Bills flagged as manifesto pledges, each tagged to a Cabinet minister, all due at election day.
+  - **Term length → election date:** snap election (**1 week**), **1 month**, **3 months**, or **1 year**.
+- **Overcommitment warning:** soft cap of **5 pledges**. Beyond it, the app warns: *"The lobby will note the ambition, Prime Minister."* Each pledge over the cap costs **−1 approval** immediately (scepticism). At the election, each **undelivered** over-cap pledge costs an extra **−3 approval** as a broken promise.
+- **Election day** (the chosen date): the writ is dropped and the ballot is called. Result bands by approval:
+  - **Landslide** (≥75): big £ bonus, +10 approval, celebration.
+  - **Majority** (50–74): standard mandate bonus.
+  - **Hung parliament** (35–49): you can only lay statutory instruments (difficulty ≤ 2) until approval recovers above 50.
+  - **Defeat** (<35): see stakes below.
 
-On app load, if `lastDailyReset` is before today (local):
+## 6. Stakes — no game over, but governments fall
 
-1. Mark expired daily/weekly quests failed.
-2. Apply approval change: `+0` if any quest completed yesterday (streak +1), else `-6` and streak = 0.
-3. Charge policy upkeep; if treasury can't cover it, the policy is auto-repealed ("defunded").
-4. Generate today's daily quests + maybe an event (seeded).
-5. Weekly reset on ISO week change: generate weekly quests.
+- **Vote of no confidence:** if approval reaches 0 mid-term, the backbenchers move a vote of no confidence → immediate early election.
+- **Defeat at the ballot** costs (agreed "option 1 + light 2"):
+  1. **Reputational:** all undelivered pledges recorded in Hansard as *broken promises* (lasting approval penalty + permanent stat); a **caretaker period** where quest rewards are halved for a few days.
+  2. **Currency:** a small flat **"cost of the election"** charged in £ (the taxpayer foots the bill).
+  - You keep level, XP, honours, stats, and history — like a real politician who loses and returns.
+- There is **no lose state and no save deletion**.
 
-### 5.10 Prestige — "New Administration"
+## 7. Approval, streaks, XP & £
 
-At player level 25, the player may start a **New Administration**: reset level/XP/currency/ministries/quests/policies, keep name, seed, best streak, and stats, increment `administration` (+10% all rewards permanently). Unlocks the "Legacy" screen showing past administrations.
+- **Approval:** 0–100, starts at 50. +2 per completed quest (daily cap +8). A day with zero completions: **−6 approval** and streak resets. Streak multiplier on rewards: `1 + min(streak, 30) × 0.02` (up to +60%).
+- **XP / levels:** `xpToNext(level) = round(80 × level^1.6)`. Quest XP = `round(20 × difficulty × streak × administration bonus)`. Level-up grants **£25 × new level** ("budget appropriation").
+- **£ (sterling):** quests pay `round(10 × difficulty × administration bonus)`; spent in the Treasury; the nation's finances are your finances.
+- **Prestige ("New Administration"):** at level 25, dissolve Parliament for a general election: reset level/£/ministries/active bills, keep history and honours, `administration += 1` → permanent **+10% all rewards**.
+- **Honours ladder** by level: titles up to CBE/OBE, then **knighthood** (Sir/Dame) at high level.
 
-## 6. Screens & routes (React Router file routes)
+## 8. Standing orders (policies)
+
+Enactable from a catalog; each has a £ enact cost and optional daily upkeep (£ or approval). Repeal = no refund. Examples: Early Riser (+10% XP before noon), No Zero Days (approval floor 40), Austerity (+25% £ from quests, approval gain halved), Open Government (−5 £/day, +approval from events), Term Limits (+20% XP on weekly bills, max 1 active weekly bill). Upkeep is charged at the midnight reset; unfunded orders are *"defunded"* and auto-repealed.
+
+## 9. The Gazette (events & scandals)
+
+- 60% chance of one seeded event per day, 2–3 choices with explicit effects (£ / approval / XP / ministry).
+- Themes: minister asleep in the chamber, leaked memo, despatch-box gaffe, select committee grilling, by-election jitters, *"delayed in committee"* obstruction (Yes Minister: *"I'll have the permanent secretary look at it, Prime Minister"*).
+- All resolved events are logged in **Hansard** with the choice made.
+
+## 10. Day cycle
+
+On app foreground and via midnight notification: mark expired items failed, apply approval/streak rules, charge standing-order upkeep, generate the day's statutory instruments (+ possible Gazette event), roll the week's items on ISO week change. Weekly PMQ scheduled Wednesday 12:00.
+
+## 11. Screens (Expo Router routes)
 
 | Route | Screen | Contents |
 |---|---|---|
-| `/` | Capitol (dashboard) | Approval gauge, level/XP bar, treasury, today's agenda summary, active policies, event card if any |
-| `/agenda` | Legislative agenda | Daily / weekly / one-off quest lists, complete & abandon actions, create custom bill |
-| `/ministries` | Ministries | Four ministry cards: level, XP bar, passive bonus, related quest history |
-| `/policies` | Standing orders | Policy catalog: enact/repeal, costs, upkeep, active state |
-| `/events` | Gazette / event log | Current event (if any) + archive of resolved events and choices |
-| `/treasury` | Treasury | Shop upgrades, transaction-style ledger of recent gains/spends |
-| `/settings` | Settings | Profile name, seed display, export/import save JSON, hard reset |
+| `/` | No. 10 (dashboard) | Approval gauge, level/XP, £, today's agenda, active orders, Gazette card, election countdown |
+| `/agenda` | Order Paper | SIs / PMBs / Government Bills by tier; start sittings; create legislation |
+| `/cabinet` | Cabinet | Seven ministers: level, XP bar, bonus, their bills |
+| `/orders` | Standing orders | Catalog: enact/repeal, costs, upkeep, active state |
+| `/gazette` | The Gazette | Today's event + Hansard archive (all actions, events, elections) |
+| `/treasury` | HM Treasury | £ balance, shop upgrades, ledger of gains/spends |
+| `/settings` | Settings | Profile, seed, export/import save, hard reset |
 
-Navigation: persistent header with route links + approval/level/currency summary.
+**Treasury shop (examples, £):** Better Whip (50×/level, +5% XP), Ministry Grant (80×/level per ministry, +4% £ from that ministry), Spin Doctor (120×/level, +1 approval per quest), Emergency Fund (200, once per administration: survive a zero day without losing streak).
 
-## 7. Tech stack & architecture
+## 12. Data model (SaveState v1)
 
-- **Framework:** React Router 7 (framework mode) on Vite, TypeScript (strict), Tailwind CSS v4 via `@tailwindcss/vite`.
-- **No backend in MVP.** All state client-side.
-- **State management:** a single `GameState` in a `useReducer` + React context (`app/state/game-context.tsx`). Actions: `completeQuest`, `abandonQuest`, `enactPolicy`, `repealPolicy`, `resolveEvent`, `buyUpgrade`, `createQuest`, `tickDay`, `prestige`, `updateProfile`.
-- **Persistence:** `app/state/save.ts` — load/save to `localStorage` under key `lifegov.save.v1`; JSON schema with `version` field and a `migrate()` chain for future changes; export/import via file download/upload in Settings.
-- **Selectors/derived state:** pure functions in `app/state/derived.ts` (xpToNext, multipliers, effective approval, ministry bonuses) so components stay dumb.
-- **Deterministic content:** `app/game/rng.ts` (mulberry32 + string hash), `app/game/quests.ts`, `app/game/policies.ts`, `app/game/events.ts` — static catalogs + seeded generators.
-- **Day cycle:** `tickDay` runs in a root loader on app load (and on `visibilitychange`), so resets happen even if the app was closed at midnight.
-- **Styling:** Tailwind utility classes, dark "capitol" theme, no component library in MVP. Game-feel via CSS transitions on number changes and progress bars.
+```ts
+interface SaveState {
+  version: 1;
+  createdAt: string;
+  seed: number;
+  player: { name; title; level; xp; currency; approval; streak; bestStreak; administration };
+  ministries: Record<MinistryId, { level; xp }>;
+  bills: Bill[];            // SIs, PMBs, Government Bills; status: proposed|reading|committee|third|assented|failed|abandoned
+  manifesto: { pledges: string[] /* bill ids */; electionDate: string; termLength: string } | null;
+  orders: OrderInstance[];  // standing orders
+  gazette: EventLogEntry[]; // Hansard: quests, events, elections, honours
+  stats: { questsCompleted; eventsResolved; currencyEarned; electionsHeld; defeats };
+  lastDailyReset: string;
+  settings: { sittingMinutes: number };
+}
+```
 
-## 8. Save format & versioning
+## 13. Milestones
 
-- Single JSON blob in localStorage; `version: 1`.
-- `migrate(save)` upgrades older versions stepwise; unknown versions → back up to `lifegov.save.backup` and start fresh with a notice.
-- Export = download `lifegov-save.json`; import = validate + migrate + reload.
+1. **M1 Scaffold:** Expo app, Expo Router routes, No. 10 layout, theme, README.
+2. **M2 State core:** save/load/migrate, reducer + context, seeded RNG, day cycle + notifications.
+3. **M3 Agenda:** SI/PMB/Bill tiers, sittings timer, pipeline stages, XP/£/approval/streak, Hansard.
+4. **M4 Cabinet & orders:** seven ministries, standing orders with upkeep, Gazette events.
+5. **M5 Manifesto & elections:** pledges, overcommitment warning, term lengths, election results, defeat/caretaker, vote of no confidence, Treasury shop.
+6. **M6 Polish:** PMQs, honours, prestige, export/import, empty states, onboarding (first manifesto), README.
 
-## 9. Milestones
+## 14. Decisions log (agreed in brainstorming)
 
-1. **M1 Scaffold:** `create-react-router` RR7 + TS + Tailwind project, root layout, header nav, routes shell, README.
-2. **M2 State core:** save/load/migrate, game context + reducer, derived selectors, day-cycle `tickDay` in root loader.
-3. **M3 Agenda:** quest catalog, seeded daily/weekly generation, complete/abandon, custom one-off quests, XP/currency/approval/streak effects.
-4. **M4 Government:** ministries with levels/bonuses, policy catalog + enact/repeal + upkeep, event catalog + resolution + log.
-5. **M5 Treasury & prestige:** shop upgrades, ledger, New Administration flow, titles by level.
-6. **M6 Polish:** empty states, animations, export/import, settings, responsive layout, README docs.
+- Deadpan Yes Minister tone; British Westminster framing throughout.
+- Mobile-first: React Native + Expo, developed in Expo Go; widgets deferred to dev-build phase; web export later.
+- Currency is £ sterling.
+- Cabinet of seven, incl. Culture Secretary; Health its own Secretary of State.
+- Manifesto: any number of pledges (soft cap 5 with overcommitment warning + penalties); term length chosen per manifesto: 1 week / 1 month / 3 months / 1 year.
+- No game over: approval 0 → vote of no confidence → early election; defeat = Hansard broken promises + approval penalty + caretaker period + small election cost in £; progress (level/honours/history) is kept.
+- Task tiers: statutory instruments (1 tap) / Private Members' Bills / Government Bills (clauses, one per sitting).
+- Sittings are timed focus sessions (default 25 min); interrupted sitting = no reward, no penalty.
+- Clause count for Government Bills is freely chosen by the player.
 
-## 10. Post-MVP ideas (not in scope now)
+## 15. Open questions
 
-- Optional backend sync (accounts, cross-device), multiplayer "coalition" challenges.
-- Achievements/badges, sound effects, PWA installability.
-- More event depth: multi-day storylines, cabinet ministers as NPCs.
-- Analytics: charts of approval/streak/productivity over time.
-- Theming: different "regimes" (democracy, technocracy...) that change UI language and rules.
-
-## 11. Open questions
-
-1. Currency name: "credits", "dollars", "political capital"? (affects copy everywhere)
-2. Should failed weekly quests cost approval, or only daily ones?
-3. Text-first UI vs. illustrated/emoji-heavy? (affects asset pipeline)
-4. Should completing quests be one click, or require a confirmation ritual (e.g. "sign the bill" button animation)?
+1. Visual style: dark despatch-box theme, serif headlines, red/gold accents — text-first, emoji-light. Confirm?
+2. Exact Gazette event catalog (~20) — write during M4.
+3. Sound: none in MVP.
+4. Should failed weekly items cost approval, or only daily ones?
