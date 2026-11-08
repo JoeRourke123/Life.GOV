@@ -138,6 +138,7 @@ interface SaveState {
   gazette: EventLogEntry[]; // Hansard: quests, events, elections, honours
   stats: { questsCompleted; eventsResolved; currencyEarned; electionsHeld; defeats };
   lastDailyReset: string;
+  lastWeeklyReset: string;
   settings: { sittingMinutes: number };
 }
 ```

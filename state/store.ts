@@ -5,7 +5,7 @@
  */
 import { AppState } from 'react-native';
 import { create } from 'zustand';
-import { dayKey, hashSeed } from './rng';
+import { dayKey, hashSeed, isoWeekKey } from './rng';
 import { rollDay } from './day-cycle';
 import { serializeSave } from './markdown';
 import { fakeV0Save, migrateToLatest, SAVE_VERSION } from './migrations';
@@ -37,6 +37,7 @@ export function newGame(seed: number, now: Date = new Date()): SaveState {
     gazette: [],
     stats: { questsCompleted: 0, eventsResolved: 0, currencyEarned: 0, electionsHeld: 0, defeats: 0 },
     lastDailyReset: dayKey(now),
+    lastWeeklyReset: isoWeekKey(now),
     settings: { sittingMinutes: 25 },
   };
 }
@@ -55,6 +56,7 @@ function toSave(s: GameStore): SaveState {
     gazette: s.gazette,
     stats: s.stats,
     lastDailyReset: s.lastDailyReset,
+    lastWeeklyReset: s.lastWeeklyReset,
     settings: s.settings,
   };
 }

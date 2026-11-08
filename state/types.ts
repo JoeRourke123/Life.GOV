@@ -83,5 +83,6 @@ export interface SaveState {
     defeats: number;
   };
   lastDailyReset: string;
+  lastWeeklyReset: string;
   settings: { sittingMinutes: number };
 }
