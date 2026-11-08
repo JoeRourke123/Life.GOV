@@ -27,9 +27,10 @@ jobs:
   deploy:
     if: github.event_name == 'workflow_dispatch' || github.event.label.name == 'deploy:web'
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+    # NOTE: no `environment: github-pages` here on purpose. That environment's
+    # protection rules only allow protected refs (main), so PR merge refs
+    # (refs/pull/*/merge) are rejected. deploy-pages only needs the workflow-
+    # level `pages: write` + `id-token: write` permissions, which we have.
     steps:
       - uses: actions/checkout@v4
 
@@ -61,3 +62,6 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+
+      - name: Deployment URL
+        run: echo "Live at https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/app/"
