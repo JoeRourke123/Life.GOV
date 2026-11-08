@@ -25,7 +25,7 @@ export interface TaskSection {
 export function TaskList({ sections }: { sections: TaskSection[] }) {
   return (
     <SectionList
-      sections={sections}
+      sections={sections.map((s) => ({ ...s, data: s.items }))}
       keyExtractor={(item) => item.id}
       scrollEnabled={false}
       renderSectionHeader={({ section }) => (
