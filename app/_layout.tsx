@@ -7,10 +7,15 @@ import { Stack } from 'expo-router';
 import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
 import { EventModeProvider } from '@/components/gov/event-mode';
+import { startDayCycle } from '@/state/store';
 
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
+  // Boot wiring (ADR-0004): hydrate the save from lifegov/save.md, then roll the
+  // day on boot and on every return to the foreground.
+  useEffect(() => startDayCycle(), []);
+
   const [fontsLoaded] = useFonts({
     'HG-400': require('../assets/fonts/HankenGrotesk-400.ttf'),
     'HG-500': require('../assets/fonts/HankenGrotesk-500.ttf'),

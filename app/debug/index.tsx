@@ -13,6 +13,7 @@ const pages: TaskSection[] = [
       { id: 'cab', title: 'Mock cabinet', sub: 'Ministers as SummaryList rows', chevron: true, onPress: () => router.push('/debug/mock-cabinet') },
       { id: 'gaz', title: 'Mock gazette', sub: 'NotificationBanner + Hansard TaskList', chevron: true, onPress: () => router.push('/debug/mock-gazette') },
       { id: 'tre', title: 'Mock treasury', sub: 'StatCards, Figure chart, ledger', chevron: true, onPress: () => router.push('/debug/mock-treasury') },
+      { id: 'spike', title: 'Spike: state & persistence', sub: 'Issue #24 PoC — markdown save, migrations, day cycle, notifications', chevron: true, onPress: () => router.push('/debug/spike-state') },
     ],
   },
 ];
