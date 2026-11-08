@@ -44,6 +44,25 @@ than a phone app with cards on it.
 8. `08-manifesto` — resolutions of the administration, term-length selector
 9. `09-election-night` — declaration of the result of the poll
 10. `10-first-run` — the commission: sign your name, form the administration
+11. `11-budget` — the Budget: receipts vs spending, deficit chart, departmental envelopes, fiscal rules
+12. `12-spending-review` — departmental variance, unfunded commitments, options before the House
+13. `13-market-event` — emergency statement: gilt yields spike when pledges are unfunded
+
+## Fiscal mechanics
+
+Money is your actual finances, not a score. The Treasury tab holds three layers:
+
+- **The ledger** — every transaction recorded like a real account book.
+- **The Budget** — departments (life areas) receive spending envelopes; receipts
+  (work done) vs spending is charted; the deficit is stated as a fact and
+  hatched on the chart. Fiscal rules bind the administration.
+- **The Spending Review** — variance per department, unfunded commitments
+  flagged by the examiners, and three honest options: reallocate, save, or
+  borrow.
+- **The market event** — if unfunded commitments accumulate, the gilt market
+  breaks: yields spike, sterling falls, approval collapses, envelopes are cut
+  by order, and the record is permanent. Withdraw or proceed; the market
+  decides next.
 
 ## Re-render
 
