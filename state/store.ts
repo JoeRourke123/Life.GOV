@@ -10,7 +10,7 @@ import { rollDay } from './day-cycle';
 import { serializeSave } from './markdown';
 import { fakeV0Save, migrateToLatest, SAVE_VERSION } from './migrations';
 import { exportSaveText, importSaveText, readSaveText, writeSaveText } from './storage';
-import { ensureNotificationPermissions, scheduleIn } from './notifications';
+import { ensureNotificationPermissions, scheduleIn, syncSchedules } from './notifications';
 import { MINISTRY_IDS } from './types';
 import type { EventLogEntry, SaveState } from './types';
 
@@ -89,20 +89,24 @@ export const useGame = create<GameStore>()((set, get) => ({
   hydrate: async () => {
     const text = await readSaveText();
     if (!text) {
+      // First run: ask for notification permission once, gracefully (#22).
+      void ensureNotificationPermissions();
       set({ ...newGame(hashSeed('lifegov', Date.now())), hydrated: true, log: say(get().log, 'No save file found — a new administration begins.') });
-      return;
+    } else {
+      try {
+        const { state, from } = migrateToLatest(text);
+        set({
+          ...state,
+          hydrated: true,
+          lastMigration: from === SAVE_VERSION ? null : `v${from} → v${SAVE_VERSION}`,
+          log: say(get().log, from === SAVE_VERSION ? 'Save loaded (v1).' : `Save migrated v${from} → v${SAVE_VERSION}.`),
+        });
+      } catch (err) {
+        set({ hydrated: true, log: say(get().log, `Save refused: ${(err as Error).message}`) });
+        return;
+      }
     }
-    try {
-      const { state, from } = migrateToLatest(text);
-      set({
-        ...state,
-        hydrated: true,
-        lastMigration: from === SAVE_VERSION ? null : `v${from} → v${SAVE_VERSION}`,
-        log: say(get().log, from === SAVE_VERSION ? 'Save loaded (v1).' : `Save migrated v${from} → v${SAVE_VERSION}.`),
-      });
-    } catch (err) {
-      set({ hydrated: true, log: say(get().log, `Save refused: ${(err as Error).message}`) });
-    }
+    void syncSchedules(toSave(get()));
   },
 
   persistNow: async () => {
@@ -118,7 +122,8 @@ export const useGame = create<GameStore>()((set, get) => ({
 
   rollDayNow: () => {
     const { state, rolled, notes } = rollDay(toSave(get()));
-    set({ ...state, log: say(get().log, ...(rolled ? notes : notes)) });
+    set({ ...state, log: say(get().log, ...notes) });
+    if (rolled) void syncSchedules(state); // schedules recomputed on each reset (#22)
   },
 
   recordEvent: (entry) => {
