@@ -1,0 +1,206 @@
+/* Life.GOV — v4 "GOV.UK Play"
+   Extends the GOV.UK design system: black header, phase banner, task lists,
+   status tags, thick-bordered panels, inset text, summary lists, GOV.UK buttons.
+   Game additions to the skeleton: approval meter, XP bar, notification banners,
+   event warnings, progress-in-phase-banner, checkbox standing orders.
+   Smooth: 4px radii, hard 2px button shadows, generous spacing, sentence case. */
+
+@font-face { font-family: 'Hanken Grotesk'; font-weight: 400; src: url('../fonts/HankenGrotesk-400.ttf'); }
+@font-face { font-family: 'Hanken Grotesk'; font-weight: 500; src: url('../fonts/HankenGrotesk-500.ttf'); }
+@font-face { font-family: 'Hanken Grotesk'; font-weight: 600; src: url('../fonts/HankenGrotesk-600.ttf'); }
+@font-face { font-family: 'Hanken Grotesk'; font-weight: 700; src: url('../fonts/HankenGrotesk-700.ttf'); }
+@font-face { font-family: 'Hanken Grotesk'; font-weight: 800; src: url('../fonts/HankenGrotesk-800.ttf'); }
+@font-face { font-family: 'IBM Plex Mono'; font-weight: 500; src: url('../fonts/IBMPlexMono-500.ttf'); }
+@font-face { font-family: 'IBM Plex Mono'; font-weight: 600; src: url('../fonts/IBMPlexMono-600.ttf'); }
+
+:root {
+  --black: #0b0c0c;
+  --secondary: #505a5f;
+  --border: #b1b4b6;
+  --light: #f3f2f1;
+  --green: #00703c;
+  --green-dark: #002d18;
+  --blue: #1d70b8;
+  --blue-dark: #002d18;
+  --red: #d4351c;
+  --red-dark: #55150b;
+  --yellow: #ffdd00;
+  --sans: 'Hanken Grotesk', system-ui, sans-serif;
+  --mono: 'IBM Plex Mono', monospace;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: #101010; font-family: var(--sans); color: var(--black); -webkit-font-smoothing: antialiased; }
+
+.phone {
+  width: 390px; height: 844px; background: #fff;
+  border-radius: 46px; border: 1px solid #000;
+  box-shadow: 0 0 0 10px #1a1c20, 0 0 0 11px #383b42, 0 30px 60px rgba(0,0,0,.55);
+  position: relative; overflow: hidden; flex-shrink: 0;
+}
+.phone::before {
+  content: ''; position: absolute; top: 11px; left: 50%; transform: translateX(-50%);
+  width: 118px; height: 32px; background: #000; border-radius: 18px; z-index: 60;
+}
+
+/* ---------- status bar (always on the black header) ---------- */
+.statusbar {
+  height: 54px; background: var(--black); color: #fff;
+  display: flex; align-items: flex-end; justify-content: space-between;
+  padding: 0 30px 6px; font-family: var(--sans); font-weight: 600; font-size: 14px;
+  position: relative; z-index: 50;
+}
+.statusbar .icons { display: flex; align-items: center; gap: 6px; }
+.batt { width: 23px; height: 11.5px; border: 1.4px solid #fff; border-radius: 2.5px; position: relative; }
+.batt::before { content:''; position:absolute; inset:1.6px; width:70%; background:#fff; border-radius:1px; }
+.batt::after { content:''; position:absolute; right:-4px; top:3px; width:2px; height:5px; background:#fff; border-radius:0 1px 1px 0; }
+
+/* ---------- gov header ---------- */
+.gov-header {
+  background: var(--black); color: #fff; padding: 8px 20px 14px;
+  display: flex; align-items: center; gap: 10px; position: relative; z-index: 40;
+}
+.wordmark { font-weight: 800; font-size: 21px; letter-spacing: .01em; flex: 1; }
+.header-meta { font-size: 13px; font-weight: 600; color: #fff; opacity: .85; }
+
+/* ---------- phase banner (gamified: parliament progress) ---------- */
+.phase-banner {
+  background: var(--light); border-bottom: 1px solid var(--border);
+  padding: 8px 20px; display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  font-size: 13px; color: var(--secondary);
+}
+.phase-banner b { color: var(--black); font-weight: 700; }
+.mini-progress { width: 90px; height: 8px; background: #d8dadd; border-radius: 4px; overflow: hidden; }
+.mini-progress div { height: 100%; background: var(--green); }
+
+/* ---------- layout ---------- */
+.app { padding: 20px; position: relative; z-index: 10; }
+
+h1.head { font-size: 31px; font-weight: 800; line-height: 1.12; letter-spacing: -.01em; }
+.lede { font-size: 16.5px; color: var(--secondary); margin-top: 7px; line-height: 1.45; }
+.section-h { font-size: 20px; font-weight: 700; margin-top: 30px; }
+
+/* ---------- status tags ---------- */
+.tag {
+  display: inline-block; font-size: 12px; font-weight: 700; line-height: 1;
+  padding: 4px 9px 3px; border-radius: 4px; color: #fff; white-space: nowrap;
+}
+.tag-green { background: var(--green); }
+.tag-blue { background: var(--blue); }
+.tag-grey { background: #646769; }
+.tag-red { background: var(--red); }
+.tag-yellow { background: var(--yellow); color: var(--black); }
+
+/* ---------- task list (the order paper / quest log) ---------- */
+.task-list { border-top: 1px solid var(--border); margin-top: 8px; }
+.task { display: flex; align-items: center; gap: 12px; padding: 14px 0; border-bottom: 1px solid var(--border); }
+.task .t-body { flex: 1; min-width: 0; }
+.task .t-title { font-size: 16.5px; font-weight: 600; line-height: 1.3; }
+.task .t-sub { font-size: 13px; color: var(--secondary); font-weight: 500; margin-top: 3px; letter-spacing: .01em; }
+.chev { flex-shrink: 0; }
+
+/* ---------- buttons ---------- */
+.btn {
+  display: flex; align-items: center; justify-content: space-between; width: 100%;
+  min-height: 50px; padding: 0 18px; margin-top: 22px;
+  background: var(--green); color: #fff; font-family: var(--sans);
+  font-weight: 700; font-size: 17px; border: none; border-radius: 4px;
+  box-shadow: 0 2px 0 var(--green-dark); cursor: pointer;
+}
+.btn-secondary { background: var(--light); color: var(--black); box-shadow: 0 2px 0 var(--black); }
+.btn-warning { background: var(--red); box-shadow: 0 2px 0 var(--red-dark); }
+.btn-row { display: flex; gap: 12px; }
+.btn-row .btn { flex: 1; }
+
+/* ---------- panel (confirmation / assent) ---------- */
+.panel { border: 5px solid var(--green); padding: 20px 18px; margin-top: 22px; }
+.panel .p-title { color: var(--green); font-size: 27px; font-weight: 800; line-height: 1.15; }
+.panel .p-body { font-size: 16px; margin-top: 10px; line-height: 1.45; }
+
+/* ---------- inset text (the record) ---------- */
+.inset {
+  border-left: 10px solid var(--blue); padding: 4px 0 4px 16px; margin-top: 24px;
+  font-size: 15.5px; color: var(--secondary); line-height: 1.5;
+}
+.inset b { color: var(--black); }
+
+/* ---------- warning (events) ---------- */
+.warning { border-left: 10px solid var(--red); padding: 4px 0 4px 16px; margin-top: 24px; }
+.warning .w-title { font-size: 19px; font-weight: 800; color: var(--red); line-height: 1.25; }
+.warning .w-body { font-size: 15.5px; margin-top: 6px; line-height: 1.5; color: var(--black); }
+
+/* ---------- notification banner (gazette) ---------- */
+.notif { border: 5px solid var(--blue); padding: 14px 16px; margin-top: 22px; }
+.notif .n-title { color: var(--blue); font-weight: 700; font-size: 16px; line-height: 1.3; }
+.notif .n-body { font-size: 15px; margin-top: 6px; line-height: 1.45; color: var(--black); }
+.notif .n-act { margin-top: 10px; font-size: 15px; font-weight: 700; color: var(--blue); text-decoration: underline; text-underline-offset: 3px; }
+
+/* ---------- summary list (cabinet / consequences) ---------- */
+.summary-list { border-top: 1px solid var(--border); margin-top: 8px; }
+.srow { display: flex; align-items: baseline; gap: 12px; padding: 13px 0; border-bottom: 1px solid var(--border); }
+.skey { width: 118px; flex-shrink: 0; font-size: 14px; font-weight: 600; color: var(--secondary); line-height: 1.35; }
+.sval { flex: 1; font-size: 16.5px; font-weight: 600; line-height: 1.3; }
+.sval .s-sub { font-size: 13px; color: var(--secondary); font-weight: 500; margin-top: 2px; }
+.sact { font-size: 15px; font-weight: 700; color: var(--blue); text-decoration: underline; text-underline-offset: 3px; white-space: nowrap; }
+
+/* ---------- meters ---------- */
+.meter-row { display: flex; justify-content: space-between; align-items: baseline; margin-top: 22px; margin-bottom: 8px; }
+.meter-label { font-size: 13px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--secondary); }
+.meter-fig { font-size: 14px; font-weight: 700; }
+.meter { height: 14px; background: var(--light); border: 1px solid var(--border); border-radius: 3px; position: relative; }
+.meter .fill { position: absolute; inset: 0 auto 0 0; background: var(--green); border-radius: 2px 0 0 2px; }
+.meter .fill.red { background: var(--red); }
+.meter .mark { position: absolute; top: -4px; bottom: -4px; width: 2px; background: var(--black); }
+.xpbar { height: 9px; background: var(--light); border: 1px solid var(--border); border-radius: 3px; position: relative; }
+.xpbar .fill { position: absolute; inset: 0 auto 0 0; background: var(--blue); }
+
+/* ---------- figures / charts ---------- */
+.figure { border: 1px solid var(--border); border-radius: 4px; padding: 12px 10px 8px; margin-top: 22px; }
+.figcap { display: flex; justify-content: space-between; font-size: 11.5px; font-weight: 600; letter-spacing: .04em; color: var(--secondary); margin-top: 8px; }
+
+/* ---------- stat cards ---------- */
+.stat-row { display: flex; gap: 10px; margin-top: 22px; }
+.stat { flex: 1; background: var(--light); border-radius: 4px; padding: 12px 10px; text-align: center; }
+.stat .st-label { font-size: 11.5px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; color: var(--secondary); }
+.stat .st-fig { font-size: 22px; font-weight: 800; margin-top: 4px; }
+
+/* ---------- checkbox (standing orders) ---------- */
+.orow { display: flex; align-items: flex-start; gap: 14px; padding: 15px 0; border-bottom: 1px solid var(--border); }
+.orow:first-child { border-top: 1px solid var(--border); }
+.cbx { width: 27px; height: 27px; border: 2px solid var(--black); border-radius: 3px; flex-shrink: 0; margin-top: 1px; position: relative; }
+.cbx.on { background: var(--green); border-color: var(--green); }
+.cbx.on::after { content: ''; position: absolute; left: 8px; top: 4px; width: 7px; height: 12px; border: solid #fff; border-width: 0 3px 3px 0; transform: rotate(42deg); }
+.orow .o-body { flex: 1; }
+.orow .o-title { font-size: 17px; font-weight: 600; line-height: 1.3; }
+.orow .o-sub { font-size: 13px; color: var(--secondary); font-weight: 500; margin-top: 3px; }
+
+/* ---------- input ---------- */
+.label { display: block; font-size: 16px; font-weight: 700; margin-top: 24px; }
+.hint { font-size: 14px; color: var(--secondary); margin-top: 4px; }
+.input {
+  width: 100%; height: 50px; border: 2px solid var(--black); border-radius: 3px;
+  font-family: var(--sans); font-size: 18px; font-weight: 600; padding: 0 14px; margin-top: 10px;
+}
+
+/* ---------- small print ---------- */
+.small { font-size: 13px; color: var(--secondary); line-height: 1.5; margin-top: 12px; }
+
+/* ---------- tab bar ---------- */
+.tabbar {
+  position: absolute; left: 0; right: 0; bottom: 0; height: 76px; z-index: 40;
+  background: #fff; border-top: 2px solid var(--black);
+  display: flex; align-items: flex-start; padding: 10px 8px 0;
+}
+.tab {
+  flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px;
+  font-size: 10.5px; font-weight: 700; color: var(--secondary);
+  border-top: 4px solid transparent; margin-top: -12px; padding-top: 8px;
+}
+.tab svg { display: block; stroke: var(--secondary); }
+.tab.on { color: var(--black); border-top-color: var(--green); }
+.tab.on svg { stroke: var(--black); }
+
+/* ---------- misc ---------- */
+.mono { font-family: var(--mono); }
+.link { color: var(--blue); font-weight: 700; text-decoration: underline; text-underline-offset: 3px; }
+.c-red { color: var(--red); } .c-green { color: var(--green); } .c-sec { color: var(--secondary); }
