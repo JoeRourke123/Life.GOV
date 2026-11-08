@@ -6,6 +6,7 @@
  *
  * Pure module: only `import type`, so it can be unit-tested in plain node.
  */
+import { dayKey, isoWeekKey } from './rng';
 import type { Bill, EventLogEntry, OrderInstance, SaveState } from './types';
 
 export const SAVE_FORMAT = 'lifegov-save';
@@ -76,6 +77,7 @@ export function serializeSave(s: SaveState): string {
       createdAt: s.createdAt,
       seed: s.seed,
       lastDailyReset: s.lastDailyReset,
+      lastWeeklyReset: s.lastWeeklyReset,
     }),
     '# Player',
     '',
@@ -216,13 +218,9 @@ export function parseSave(text: string): SaveState {
       electionsHeld: Number(stats.get('electionsHeld') ?? 0),
       defeats: Number(stats.get('defeats') ?? 0),
     },
-    lastDailyReset: fm.lastDailyReset ?? dayKeyLocal(),
+    lastDailyReset: fm.lastDailyReset ?? dayKey(),
+    lastWeeklyReset: fm.lastWeeklyReset ?? isoWeekKey(),
     settings: { sittingMinutes: Number(settings.get('sittingMinutes') ?? 25) },
   };
 }
 
-function dayKeyLocal(): string {
-  const d = new Date();
-  const m = String(d.getMonth() + 1).padStart(2, '0');
-  return `${d.getFullYear()}-${m}-${String(d.getDate()).padStart(2, '0')}`;
-}

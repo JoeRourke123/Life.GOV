@@ -8,7 +8,7 @@
 import { parseFrontmatter, parseSave } from './markdown';
 import type { SaveState } from './types';
 import { MINISTRY_IDS } from './types';
-import { dayKey, hashSeed } from './rng';
+import { dayKey, hashSeed, isoWeekKey } from './rng';
 
 export const SAVE_VERSION = 1;
 
@@ -60,6 +60,7 @@ function migrateV0toV1(raw: SaveV0Raw, createdAt: string): SaveState {
     ],
     stats: { questsCompleted: 0, eventsResolved: 0, currencyEarned: 0, electionsHeld: 0, defeats: 0 },
     lastDailyReset: dayKey(new Date(createdAt)),
+    lastWeeklyReset: isoWeekKey(new Date(createdAt)),
     settings: { sittingMinutes: 25 },
   };
 }
