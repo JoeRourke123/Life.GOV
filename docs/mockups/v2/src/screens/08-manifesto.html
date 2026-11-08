@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><link rel="stylesheet" href="../base.css"></head>
+<body>
+<div class="phone" id="shot">
+  <div class="statusbar"><div>9:41</div><div class="icons"><svg width="17" height="11" viewBox="0 0 17 11"><path d="M1 10 L3 10 M4.5 8 L6.5 8 M8 6 L10 6 M11.5 4 L13.5 4 M15 2 L16 2" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/></svg><svg width="16" height="11" viewBox="0 0 16 11"><path d="M8 10 L1.5 3.5 C5 .8 11 .8 14.5 3.5 Z" fill="#fff"/></svg><div class="batt"></div></div></div>
+
+  <div class="app">
+    <div style="margin-top:6px;">
+      <div class="kicker">New term</div>
+      <div class="h1" style="margin-top:4px;">Draft manifesto</div>
+    </div>
+
+    <!-- term length -->
+    <div class="kicker" style="margin-top:14px;">Term length → election day</div>
+    <div style="display:flex; gap:6px; margin-top:8px;">
+      <div style="flex:1; height:44px; border:1.4px solid var(--line2); border-radius:10px; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+        <div style="font-size:13px; font-weight:700; color:var(--muted);">1 week</div><div style="font-size:9.5px; color:var(--faint);">snap</div>
+      </div>
+      <div style="flex:1; height:44px; border:1.4px solid var(--gold); border-radius:10px; background:var(--gold-dim); display:flex; flex-direction:column; align-items:center; justify-content:center;">
+        <div style="font-size:13px; font-weight:800; color:var(--gold-bright);">1 month</div><div style="font-size:9.5px; color:rgba(238,194,95,.7);">writ · 2 Dec</div>
+      </div>
+      <div style="flex:1; height:44px; border:1.4px solid var(--line2); border-radius:10px; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+        <div style="font-size:13px; font-weight:700; color:var(--muted);">3 months</div><div style="font-size:9.5px; color:var(--faint);">full term</div>
+      </div>
+      <div style="flex:1; height:44px; border:1.4px solid var(--line2); border-radius:10px; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+        <div style="font-size:13px; font-weight:700; color:var(--muted);">1 year</div><div style="font-size:9.5px; color:var(--faint);">brave</div>
+      </div>
+    </div>
+
+    <!-- pledges -->
+    <div style="display:flex; align-items:baseline; justify-content:space-between; margin-top:16px;">
+      <div class="kicker">Pledges <span class="rule"></span></div>
+      <div style="font-size:11.5px; color:var(--muted);"><span style="color:var(--text); font-weight:800;">6</span> tabled · cap 5</div>
+    </div>
+    <div id="pledges"></div>
+
+    <!-- over-cap negotiation, not an error -->
+    <div style="margin-top:10px; border:1.4px dashed rgba(210,154,58,.55); background:var(--amber-dim); border-radius:12px; padding:11px 13px;">
+      <div style="display:flex; align-items:center; gap:8px;">
+        <svg width="18" height="18" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8.4" fill="none" stroke="#d29a3a" stroke-width="1.6"/><path d="M10 5.6 V11 M10 13.6 V14.6" stroke="#d29a3a" stroke-width="1.8" stroke-linecap="round"/></svg>
+        <div style="font-weight:700; font-size:13px; color:var(--amber);">Over the cap, Prime Minister</div>
+      </div>
+      <div style="font-size:12px; color:var(--muted); margin-top:5px; line-height:1.5; font-family:var(--serif); font-style:italic;">The lobby will note the ambition. One pledge over the cap: −1 approval now, −3 if undelivered at the ballot.</div>
+      <div style="display:flex; gap:8px; margin-top:9px;">
+        <div class="btn btn-amber-outline btn-sm" style="flex:1;">Table it anyway</div>
+        <div class="btn btn-outline btn-sm" style="flex:1;">Withdraw one</div>
+      </div>
+    </div>
+
+    <div class="btn btn-gold" style="margin-top:12px; height:50px; font-size:15px; letter-spacing:.06em;">PRESENT THE MANIFESTO</div>
+    <div style="text-align:center; margin-top:8px; font-size:11px; color:var(--faint); font-style:italic; font-family:var(--serif);">Parliament is dissolved. The writ is issued. Good luck at the despatch box.</div>
+  </div>
+
+  <div class="tabbar">
+    <div class="tab"><svg viewBox="0 0 24 24"><path d="M4 21 V8 L12 3 L20 8 V21"/><path d="M9 21 V13 H15 V21"/></svg><div class="tick"></div><span>No. 10</span></div>
+    <div class="tab on"><svg viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8 H15 M9 12 H15 M9 16 H13"/></svg><div class="tick"></div><span>Order Paper</span></div>
+    <div class="tab"><svg viewBox="0 0 24 24"><circle cx="8" cy="8" r="3"/><circle cx="16" cy="8" r="3"/><path d="M2.5 20 C2.5 15.5 6 14 8 14 C10 14 13.5 15.5 13.5 20 M10.5 20 C10.5 15.5 14 14 16 14 C18 14 21.5 15.5 21.5 20"/></svg><div class="tick"></div><span>Cabinet</span></div>
+    <div class="tab"><svg viewBox="0 0 24 24"><path d="M4 5 H20 V19 H4 Z"/><path d="M4 9 H20 M9 9 V19"/></svg><div class="tick"></div><span>Gazette</span></div>
+    <div class="tab"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9 8 H13.5 A2.5 2.5 0 0 1 13.5 13 H9 M11 13 H14.5 A2.5 2.5 0 0 1 14.5 18 H9 M9 8 V18 M8.2 10.5 H12 M8.2 15.5 H12" stroke-width="1.4"/></svg><div class="tick"></div><span>Treasury</span></div>
+  </div>
+</div>
+
+<script>
+const pledges = [
+  { t: 'Run a marathon', min: 'H', area: 'Health +8%', due: 'clause 7 of 12' },
+  { t: 'Save £1,000', min: 'C', area: 'Chancellor +10%', due: 'on track' },
+  { t: 'Read 12 books', min: 'C', area: 'Culture +12%', due: '4 of 12 sittings' },
+  { t: 'Ship Project X', min: 'B', area: 'Business +14%', due: 'committee' },
+  { t: 'Weekly dinner with friends', min: 'F', area: 'Foreign +4%', due: 'recurring' },
+  { t: 'Learn basic Spanish', min: 'E', area: 'Education +12%', due: 'over cap', over: true },
+];
+document.getElementById('pledges').innerHTML = pledges.map(p => `
+  <div class="card ${p.over ? '' : 'paper'}" style="margin-top:7px; padding:9px 11px; ${p.over ? 'opacity:.75; border-style:dashed;' : ''}">
+    <div style="display:flex; align-items:center; gap:9px;">
+      <div style="width:28px; height:28px; border-radius:50%; border:1.3px solid ${p.over ? 'var(--line2)' : 'var(--gold)'}; display:flex; align-items:center; justify-content:center; font-family:var(--serif); font-weight:700; font-size:12px; color:${p.over ? 'var(--muted)' : 'var(--gold-bright)'}; background:${p.over ? 'transparent' : 'var(--gold-dim)'};">${p.min}</div>
+      <div style="flex:1;">
+        <div style="font-weight:700; font-size:13.5px;">${p.t}</div>
+        <div style="font-size:10.5px; color:var(--faint); margin-top:1px;">${p.area} · ${p.due}</div>
+      </div>
+      ${p.over ? '<div class="btn btn-outline btn-sm" style="height:30px;">Remove</div>' : '<svg width="16" height="16" viewBox="0 0 16 16"><path d="M3 8.5 L6.5 12 L13 4.5" fill="none" stroke="#5aa976" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>'}
+    </div>
+  </div>`).join('');
+</script>
+</body></html>

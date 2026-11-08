@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><link rel="stylesheet" href="../base.css"></head>
+<body>
+<div class="phone" id="shot" style="background: radial-gradient(120% 90% at 50% -10%, #292215 0%, #121419 58%);">
+  <div class="statusbar"><div>22:00</div><div class="icons"><svg width="17" height="11" viewBox="0 0 17 11"><path d="M1 10 L3 10 M4.5 8 L6.5 8 M8 6 L10 6 M11.5 4 L13.5 4 M15 2 L16 2" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/></svg><svg width="16" height="11" viewBox="0 0 16 11"><path d="M8 10 L1.5 3.5 C5 .8 11 .8 14.5 3.5 Z" fill="#fff"/></svg><div class="batt"></div></div></div>
+
+  <div class="app" style="display:flex; flex-direction:column; height:756px;">
+    <div style="text-align:center; margin-top:16px;">
+      <div class="kicker" style="justify-content:center; color:var(--gold);">The count is declared</div>
+      <div class="h1" style="font-size:32px; margin-top:10px;">The General Election</div>
+    </div>
+
+    <!-- result band -->
+    <div style="margin-top:18px; border:1.5px solid var(--gold); border-radius:14px; background:linear-gradient(180deg, rgba(217,169,60,.18), rgba(217,169,60,.07)); padding:16px; text-align:center;">
+      <div style="font-family:var(--serif); font-style:italic; font-size:13px; color:rgba(238,194,95,.8);">The Returning Officer for Life.GOV declares:</div>
+      <div style="font-family:var(--serif); font-weight:700; font-size:30px; color:var(--gold-bright); margin-top:6px; letter-spacing:.02em;">MAJORITY</div>
+      <div style="font-family:var(--serif); font-style:italic; font-size:13.5px; color:var(--muted); margin-top:4px;">The ayes have it. The Member for Everywhere is returned.</div>
+    </div>
+
+    <!-- the chamber, fuller than before -->
+    <div class="card" style="margin-top:14px; padding:10px 14px 8px;">
+      <div style="display:flex; justify-content:space-between; align-items:baseline;">
+        <div class="kicker">The House as elected</div>
+        <div style="font-size:12px; color:var(--muted);">Approval <span style="font-weight:800; color:var(--text);">57</span></div>
+      </div>
+      <svg id="chamber" width="330" height="120" viewBox="0 0 330 128" style="display:block; margin:0 auto;"></svg>
+    </div>
+
+    <!-- the ballot -->
+    <div style="margin-top:14px;">
+      <div class="kicker">The ballot <span class="rule"></span></div>
+      <div class="card" style="margin-top:8px; padding:4px 13px;">
+        <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid var(--line);">
+          <div style="font-size:12.5px; color:var(--muted);">Pledges delivered</div>
+          <div class="mono green" style="font-size:12.5px; font-weight:600;">3 of 5</div>
+        </div>
+        <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid var(--line);">
+          <div style="font-size:12.5px; color:var(--muted);">Broken promises — recorded in Hansard</div>
+          <div class="mono" style="font-size:12.5px; font-weight:600; color:#e0796c;">2</div>
+        </div>
+        <div style="display:flex; justify-content:space-between; padding:8px 0;">
+          <div style="font-size:12.5px; color:var(--muted);">Cost of the election</div>
+          <div class="mono" style="font-size:12.5px; font-weight:600; color:#e0796c;">−£50</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- mandate -->
+    <div style="margin-top:12px; display:flex; gap:8px;">
+      <div class="card" style="flex:1; padding:10px; text-align:center;">
+        <div class="gold" style="font-family:var(--mono); font-weight:600; font-size:16px;">+£250</div>
+        <div style="font-size:10.5px; color:var(--faint); margin-top:2px; letter-spacing:.08em;">MANDATE BONUS</div>
+      </div>
+      <div class="card" style="flex:1; padding:10px; text-align:center;">
+        <div class="green" style="font-family:var(--mono); font-weight:600; font-size:16px;">+5</div>
+        <div style="font-size:10.5px; color:var(--faint); margin-top:2px; letter-spacing:.08em;">APPROVAL</div>
+      </div>
+      <div class="card" style="flex:1; padding:10px; text-align:center;">
+        <div style="font-family:var(--mono); font-weight:600; font-size:16px; color:var(--text);">II</div>
+        <div style="font-size:10.5px; color:var(--faint); margin-top:2px; letter-spacing:.08em;">ADMINISTRATION</div>
+      </div>
+    </div>
+
+    <div style="flex:1;"></div>
+
+    <div class="btn btn-gold" style="height:52px; font-size:15px; letter-spacing:.08em;">FORM A NEW ADMINISTRATION</div>
+    <div style="text-align:center; margin:10px 0 4px; font-size:11px; color:var(--faint); font-style:italic; font-family:var(--serif);">The broken promises remain in Hansard. History is watching.</div>
+  </div>
+</div>
+
+<script>
+const svg = document.getElementById('chamber');
+const seats = [];
+const cx = 165, cy = 148, rx = 128, ry = 108;
+for (let row = 0; row < 2; row++) {
+  const r = 1 - row * 0.16;
+  const count = row === 0 ? 11 : 9;
+  const start = Math.PI * 1.06, end = Math.PI * 1.94;
+  for (let i = 0; i < count; i++) {
+    const t = start + (end - start) * (i / (count - 1));
+    seats.push({ x: cx + Math.cos(t) * rx * r, y: cy + Math.sin(t) * ry * r, row });
+  }
+}
+const filled = Math.round(0.57 * seats.length);
+svg.innerHTML = seats.map((s, i) => {
+  const on = i < filled;
+  return `<circle cx="${s.x.toFixed(1)}" cy="${s.y.toFixed(1)}" r="${s.row ? 4.4 : 5.4}" fill="${on ? '#d9a93c' : 'none'}" stroke="${on ? '#d9a93c' : '#3c4350'}" stroke-width="1.4" opacity="${on ? .95 : .8}"/>`;
+}).join('') +
+`<rect x="141" y="112" width="48" height="13" rx="2" fill="#8d2a1e"/><rect x="149" y="106" width="32" height="6" rx="1.5" fill="#a8372a"/>`;
+</script>
+</body></html>

@@ -1,0 +1,154 @@
+/* Life.GOV — v2 mockup design system
+   Rules carried over from critique:
+   - gold = elections, assent, ceremony ONLY
+   - red = despatch box / single primary action + scandal ONLY
+   - amber = warnings & suspension
+   - green = ayes / passed / positive money
+   - section headers: muted small-caps sans (never gold)
+   - type floor 11px, touch targets 44px */
+
+@font-face { font-family: 'Hanken Grotesk'; font-weight: 400; src: url('../fonts/HankenGrotesk-400.ttf'); }
+@font-face { font-family: 'Hanken Grotesk'; font-weight: 500; src: url('../fonts/HankenGrotesk-500.ttf'); }
+@font-face { font-family: 'Hanken Grotesk'; font-weight: 600; src: url('../fonts/HankenGrotesk-600.ttf'); }
+@font-face { font-family: 'Hanken Grotesk'; font-weight: 700; src: url('../fonts/HankenGrotesk-700.ttf'); }
+@font-face { font-family: 'Hanken Grotesk'; font-weight: 800; src: url('../fonts/HankenGrotesk-800.ttf'); }
+@font-face { font-family: 'STIX Two Text'; font-weight: 400; src: url('../fonts/STIXTwoText-400.ttf'); }
+@font-face { font-family: 'STIX Two Text'; font-weight: 600; src: url('../fonts/STIXTwoText-600.ttf'); }
+@font-face { font-family: 'STIX Two Text'; font-weight: 700; src: url('../fonts/STIXTwoText-700.ttf'); }
+@font-face { font-family: 'STIX Two Text'; font-style: italic; font-weight: 400; src: url('../fonts/STIXTwoText-400i.ttf'); }
+@font-face { font-family: 'IBM Plex Mono'; font-weight: 400; src: url('../fonts/IBMPlexMono-400.ttf'); }
+@font-face { font-family: 'IBM Plex Mono'; font-weight: 500; src: url('../fonts/IBMPlexMono-500.ttf'); }
+@font-face { font-family: 'IBM Plex Mono'; font-weight: 600; src: url('../fonts/IBMPlexMono-600.ttf'); }
+
+:root {
+  --ink: #121419;
+  --ink2: #181b21;
+  --panel: #1f232b;
+  --panel2: #262b35;
+  --line: #2d333e;
+  --line2: #3c4350;
+  --text: #edebe4;
+  --muted: #939aa7;
+  --faint: #5d6472;
+  --red: #c8402f;
+  --red-deep: #8d2a1e;
+  --red-dim: rgba(200, 64, 47, 0.15);
+  --gold: #d9a93c;
+  --gold-bright: #eec25f;
+  --gold-dim: rgba(217, 169, 60, 0.13);
+  --green: #5aa976;
+  --green-dim: rgba(90, 169, 118, 0.14);
+  --amber: #d29a3a;
+  --amber-dim: rgba(210, 154, 58, 0.13);
+  --serif: 'STIX Two Text', Georgia, serif;
+  --sans: 'Hanken Grotesk', -apple-system, sans-serif;
+  --mono: 'IBM Plex Mono', Menlo, monospace;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body { background: #0a0b0d; font-family: var(--sans); color: var(--text); -webkit-font-smoothing: antialiased; }
+
+.phone {
+  width: 390px; height: 844px; background: var(--ink);
+  border-radius: 46px; border: 1px solid #000;
+  box-shadow: 0 0 0 10px #1a1c20, 0 0 0 11px #383b42, 0 30px 60px rgba(0,0,0,.55);
+  position: relative; overflow: hidden; flex-shrink: 0;
+}
+.phone::before {
+  content: ''; position: absolute; top: 11px; left: 50%; transform: translateX(-50%);
+  width: 118px; height: 32px; background: #000; border-radius: 18px; z-index: 60;
+}
+
+/* ---------- status bar ---------- */
+.statusbar {
+  height: 54px; display: flex; align-items: flex-end; justify-content: space-between;
+  padding: 0 30px 6px; font-family: var(--sans); font-weight: 700; font-size: 14px;
+  position: relative; z-index: 50;
+}
+.statusbar .icons { display: flex; align-items: center; gap: 6px; }
+.batt { width: 24px; height: 12px; border: 1.4px solid rgba(255,255,255,.7); border-radius: 3.5px; position: relative; }
+.batt::before { content:''; position:absolute; inset:1.6px; width: 70%; background: #fff; border-radius: 1.5px; }
+.batt::after { content:''; position:absolute; right:-4px; top:3px; width:2px; height:5px; background: rgba(255,255,255,.7); border-radius: 0 1px 1px 0; }
+
+/* ---------- layout ---------- */
+.app { padding: 0 18px; position: relative; z-index: 10; }
+.kicker {
+  font-size: 11px; font-weight: 800; letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--muted); display: flex; align-items: center; gap: 8px;
+}
+.kicker .rule { flex: 1; height: 1px; background: var(--line); }
+.h1 { font-family: var(--serif); font-weight: 700; font-size: 30px; line-height: 1.1; letter-spacing: -0.01em; }
+.h2 { font-family: var(--serif); font-weight: 700; font-size: 21px; line-height: 1.15; }
+.mono { font-family: var(--mono); }
+.muted { color: var(--muted); }
+.gold { color: var(--gold); }
+.green { color: var(--green); }
+.red { color: var(--red); }
+
+/* ---------- cards ---------- */
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; }
+.card.paper { background: linear-gradient(180deg, #23272f, #1e222a); }
+
+/* ---------- buttons (min 44px) ---------- */
+.btn {
+  height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center;
+  font-family: var(--sans); font-size: 14px; font-weight: 700; letter-spacing: 0.02em;
+  padding: 0 16px; gap: 8px; white-space: nowrap;
+}
+.btn-red { background: var(--red); color: #fff; box-shadow: inset 0 -2px 0 rgba(0,0,0,.28), 0 4px 14px rgba(200,64,47,.25); }
+.btn-red-outline { border: 1.4px solid rgba(200,64,47,.65); color: #e0796c; background: transparent; }
+.btn-outline { border: 1.4px solid var(--line2); color: var(--text); background: transparent; }
+.btn-gold { background: linear-gradient(180deg, var(--gold-bright), var(--gold)); color: #241a05; box-shadow: inset 0 -2px 0 rgba(0,0,0,.22), 0 4px 16px rgba(217,169,60,.28); }
+.btn-amber-outline { border: 1.4px solid rgba(210,154,58,.6); color: var(--amber); background: transparent; }
+.btn-sm { height: 38px; font-size: 13px; padding: 0 14px; }
+
+/* ---------- chips & tags ---------- */
+.chip {
+  display: inline-flex; align-items: center; gap: 5px; height: 24px; padding: 0 9px;
+  border-radius: 7px; font-size: 11px; font-weight: 700; letter-spacing: 0.04em;
+}
+.chip-min { background: var(--panel2); border: 1px solid var(--line2); color: var(--muted); }
+.chip-gold { background: var(--gold-dim); border: 1px solid rgba(217,169,60,.4); color: var(--gold); }
+.chip-green { background: var(--green-dim); border: 1px solid rgba(90,169,118,.4); color: var(--green); }
+.chip-red { background: var(--red-dim); border: 1px solid rgba(200,64,47,.45); color: #e0796c; }
+
+/* ---------- stars (difficulty) ---------- */
+.stars { display: inline-flex; gap: 2.5px; }
+.star { width: 9px; height: 9px; border-radius: 50%; background: var(--faint); }
+.star.on { background: var(--gold); }
+.star.on.r { background: var(--red); }
+
+/* ---------- bill stage pipeline glyph ---------- */
+.pipeline { display: flex; align-items: center; }
+.pipe-dot { width: 8px; height: 8px; border-radius: 50%; border: 1.5px solid var(--faint); }
+.pipe-dot.done { background: var(--green); border-color: var(--green); }
+.pipe-dot.now { background: var(--gold); border-color: var(--gold); box-shadow: 0 0 0 3px var(--gold-dim); }
+.pipe-link { width: 14px; height: 1.5px; background: var(--line2); }
+.pipe-link.done { background: var(--green); }
+
+/* ---------- tab bar ---------- */
+.tabbar {
+  position: absolute; left: 0; right: 0; bottom: 0; height: 84px; z-index: 40;
+  background: rgba(15,17,21,0.92); border-top: 1px solid var(--line);
+  backdrop-filter: blur(10px); display: flex; padding: 10px 8px 26px;
+}
+.tab { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; color: var(--faint); }
+.tab svg { width: 23px; height: 23px; stroke: currentColor; fill: none; stroke-width: 1.7; }
+.tab span { font-size: 10.5px; font-weight: 700; letter-spacing: 0.03em; }
+.tab.on { color: var(--text); }
+.tab.on .tick { width: 18px; height: 3px; border-radius: 2px; background: var(--red); margin-top: 1px; }
+.tab .tick { width: 18px; height: 3px; border-radius: 2px; background: transparent; margin-top: 1px; }
+
+/* ---------- misc ---------- */
+.hairline { height: 1px; background: var(--line); }
+.seal {
+  width: 54px; height: 54px; border-radius: 50%; border: 2px solid var(--red);
+  outline: 1.5px solid var(--red); outline-offset: 3px; display: flex; align-items: center;
+  justify-content: center; color: var(--red); font-family: var(--serif); font-weight: 700;
+  font-size: 13px; transform: rotate(-8deg); opacity: .9; text-align: center; line-height: 1.1;
+}
+.seal.gold { border-color: var(--gold); outline-color: var(--gold); color: var(--gold); }
+.tick-tally { display: flex; gap: 4px; align-items: center; }
+.tick-tally .t { width: 7px; height: 16px; border-radius: 2px; background: var(--green); opacity: .9; }
+.tick-tally .t.off { background: var(--line2); opacity: .5; }
