@@ -19,9 +19,9 @@ Status: v0.2 — brainstormed and agreed design, pre-implementation. This docume
 
 ## 2. Tech stack
 
-- **React Native + Expo**, developed via **Expo Go** (Expo SDK core only: AsyncStorage / expo-sqlite / expo-notifications all available; no custom native modules).
+- **React Native + Expo**, developed via **Expo Go** (Expo SDK core only: expo-file-system / expo-notifications available; no custom native modules).
 - **Expo Router** for file-based navigation — routes map 1:1 to screens below.
-- **Persistence:** AsyncStorage under key `lifegov.save.v1`, JSON with `version` + migration chain; export/import via share sheet.
+- **Persistence:** the save is an open markdown file, `lifegov/save.md` (frontmatter `version` + migration chain), written via expo-file-system; export/import via share sheet ("Save to Files" → iCloud Drive) + document picker. Decision: ADR-0004.
 - **Notifications:** `expo-notifications` scheduled locally — midnight agenda, Wednesday 12:00 PMQs, election countdown, low-approval warnings.
 - **Home-screen widgets / quick-add shortcuts:** deferred — they require a native dev build, not Expo Go. Revisit post-MVP.
 - **Web:** Expo can export a web build later; the original React Router web idea is sequenced after mobile, not abandoned.
