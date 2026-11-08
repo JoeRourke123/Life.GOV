@@ -75,3 +75,23 @@ export const GAZETTE_POOL: GazetteContent[] = [
   { title: 'Photo opportunity backfires', detail: 'The prop was not load-bearing.' },
   { title: 'A spelling error in a white paper', detail: 'Corrected by statutory instrument.' },
 ];
+
+export interface StandingOrderContent {
+  id: string;
+  title: string;
+  enactCost: number;
+  upkeep: { gbp: number; approval: number };
+}
+
+/** Standing-order catalog — DESIGN.md §8 examples. The full catalog + enact/repeal UI is M4 (#11). */
+export const STANDING_ORDERS: StandingOrderContent[] = [
+  { id: 'early-riser', title: 'Early Riser', enactCost: 40, upkeep: { gbp: 0, approval: 0 } },
+  { id: 'no-zero-days', title: 'No Zero Days', enactCost: 60, upkeep: { gbp: 0, approval: 0 } },
+  { id: 'austerity', title: 'Austerity', enactCost: 80, upkeep: { gbp: 0, approval: 0 } },
+  { id: 'open-government', title: 'Open Government', enactCost: 50, upkeep: { gbp: 5, approval: 0 } },
+  { id: 'term-limits', title: 'Term Limits', enactCost: 70, upkeep: { gbp: 0, approval: 0 } },
+];
+
+export function orderUpkeep(orderId: string): { gbp: number; approval: number } {
+  return STANDING_ORDERS.find((o) => o.id === orderId)?.upkeep ?? { gbp: 0, approval: 0 };
+}
