@@ -1,0 +1,67 @@
+name: Deploy web app to Pages (/app)
+
+# Label-gated deploy: add the `deploy:web` label to a pull request (or run
+# this workflow manually) to build the web bundle and publish it to GitHub
+# Pages under the /app subpath:
+#   https://<owner>.github.io/<repo>/app/
+#
+# NOTE: a GitHub Pages deployment replaces the WHOLE site artifact, so this
+# uploads the design-system docs at the root AND the app under /app in one
+# artifact. (The docs-only deploy in pages.yml will replace this on the next
+# push that touches docs/design-system/** — re-apply the label to restore.)
+on:
+  pull_request:
+    types: [labeled]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    if: github.event_name == 'workflow_dispatch' || github.event.label.name == 'deploy:web'
+    runs-on: ubuntu-latest
+    # NOTE: no `environment: github-pages` here on purpose. That environment's
+    # protection rules only allow protected refs (main), so PR merge refs
+    # (refs/pull/*/merge) are rejected. deploy-pages only needs the workflow-
+    # level `pages: write` + `id-token: write` permissions, which we have.
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Export web build with /app base path
+        env:
+          EXPO_BASE_URL: /${{ github.event.repository.name }}/app
+        run: npx expo export --platform web --output-dir dist-web
+
+      - name: Stage site (docs at root, app under /app)
+        run: |
+          mkdir -p site/app
+          cp -r docs/design-system/. site/
+          cp -r dist-web/. site/app/
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+      - name: Deployment URL
+        run: echo "Live at https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/app/"
