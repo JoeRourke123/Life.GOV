@@ -7,7 +7,7 @@
  * Pure module: only `import type`, so it can be unit-tested in plain node.
  */
 import { dayKey, isoWeekKey } from './rng';
-import type { Bill, EventLogEntry, OrderInstance, SaveState } from './types';
+import type { Bill, EventLogEntry, OrderInstance, SaveState, Sitting } from './types';
 
 export const SAVE_FORMAT = 'lifegov-save';
 
@@ -106,6 +106,17 @@ export function serializeSave(s: SaveState): string {
         `| ${b.id} | ${cell(b.title)} | ${b.tier} | ${b.ministry} | ${b.status} | ${b.stars} | ${b.clauses} | ${b.clausesDone} | ${b.createdAt} |`,
     ),
     '',
+    '# Sitting',
+    '',
+    ...(s.sitting
+      ? [
+          `- billId: ${s.sitting.billId}`,
+          `- clauseIndex: ${s.sitting.clauseIndex}`,
+          `- startedAt: ${s.sitting.startedAt}`,
+          `- endsAt: ${s.sitting.endsAt}`,
+        ]
+      : ['- none']),
+    '',
     '# Orders',
     '',
     '| id | orderId | enactedAt | active |',
@@ -168,6 +179,16 @@ export function parseSave(text: string): SaveState {
       clausesDone: Number(r[7]),
       createdAt: r[8],
     }));
+  const sit = bullets(secs.get('Sitting') ?? []);
+  const sitting: Sitting | null =
+    sit.size === 0 || sit.get('none') !== undefined
+      ? null
+      : {
+          billId: String(sit.get('billId') ?? ''),
+          clauseIndex: Number(sit.get('clauseIndex') ?? 0),
+          startedAt: String(sit.get('startedAt') ?? ''),
+          endsAt: String(sit.get('endsAt') ?? ''),
+        };
   const orders: OrderInstance[] = table(secs.get('Orders') ?? [])
     .slice(1)
     .map((r) => ({ id: r[0], orderId: r[1], enactedAt: r[2], active: r[3] === 'true' }));
@@ -198,6 +219,7 @@ export function parseSave(text: string): SaveState {
     },
     ministries,
     bills,
+    sitting,
     manifesto:
       man.size === 0 || man.get('none') !== undefined
         ? null

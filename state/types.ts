@@ -41,6 +41,15 @@ export interface Bill {
   createdAt: string;
 }
 
+/** An in-progress sitting — persisted in the save so it survives a force-quit (ADR-0005). */
+export interface Sitting {
+  billId: string;
+  /** 0-based; equals bill.clausesDone while the sitting runs. */
+  clauseIndex: number;
+  startedAt: string;
+  endsAt: string;
+}
+
 export interface OrderInstance {
   id: string;
   orderId: string;
@@ -72,6 +81,7 @@ export interface SaveState {
   };
   ministries: Record<MinistryId, { level: number; xp: number }>;
   bills: Bill[];
+  sitting: Sitting | null;
   manifesto: { pledges: string[]; electionDate: string; termLength: string } | null;
   orders: OrderInstance[];
   gazette: EventLogEntry[];
