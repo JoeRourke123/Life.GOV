@@ -14,6 +14,8 @@ export interface TaskItem {
   sub?: string;
   status?: TagStatus;
   chevron?: boolean;
+  /** Row-level destructive action (e.g. abandon a bill), rendered as a small red text button. */
+  danger?: { label: string; onPress: () => void };
   onPress?: () => void;
 }
 
@@ -41,10 +43,15 @@ export function TaskList({ sections }: { sections: TaskSection[] }) {
               {item.sub ? <Text style={[type.sub, { color: colors.secondary, marginTop: 3 }]} numberOfLines={2}>{item.sub}</Text> : null}
             </View>
             {item.status ? <Tag status={item.status} /> : null}
+            {item.danger ? (
+              <Pressable accessibilityRole="button" accessibilityLabel={item.danger.label} onPress={item.danger.onPress}>
+                <Text style={[type.tag, { color: colors.red }]}>{item.danger.label}</Text>
+              </Pressable>
+            ) : null}
             {item.chevron ? <ChevronIcon /> : null}
           </View>
         );
-        const label = [item.title, item.sub, item.status ? item.status : null].filter(Boolean).join(', ');
+        const label = [item.title, item.sub, item.status ? item.status : null, item.danger ? item.danger.label : null].filter(Boolean).join(', ');
         if (!item.onPress) {
           return (
             <View accessibilityRole="text" accessibilityLabel={label}>{row}</View>

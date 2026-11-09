@@ -1,5 +1,6 @@
 /** Spike PoC (issue #25): sittings timer survives backgrounding/force-quit; bill pipeline state machine. ADR-0005. */
 import { useEffect, useState } from 'react';
+import { router } from 'expo-router';
 import { Text, View } from 'react-native';
 import { ButtonRow, GovScreen, Panel, Tag } from '@/components/gov';
 import { isElapsed, remainingMs } from '@/state/sitting';
@@ -110,7 +111,19 @@ export default function SpikeSittingScreen() {
           }}
         />
         <ButtonRow
-          primary={{ title: nextBill ? 'Start sitting' : 'Start sitting (draft first)', onPress: () => nextBill && startSitting(nextBill.id) }}
+          primary={
+            sitting
+              ? { title: 'Open the sitting screen', onPress: () => router.push('/sitting') }
+              : {
+                  title: nextBill ? 'Start sitting' : 'Start sitting (draft first)',
+                  onPress: () => {
+                    if (nextBill) {
+                      startSitting(nextBill.id);
+                      router.push('/sitting');
+                    }
+                  },
+                }
+          }
           secondary={{ title: 'Adjourn — suspend', onPress: adjournSitting }}
         />
         <ButtonRow
