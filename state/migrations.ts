@@ -53,6 +53,7 @@ function migrateV0toV1(raw: SaveV0Raw, createdAt: string): SaveState {
     },
     ministries: Object.fromEntries(MINISTRY_IDS.map((id) => [id, { level: 1, xp: 0 }])) as SaveState['ministries'],
     bills: [],
+    sitting: null,
     manifesto: null,
     orders: [],
     gazette: [

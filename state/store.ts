@@ -11,6 +11,17 @@ import { serializeSave } from './markdown';
 import { fakeV0Save, migrateToLatest, SAVE_VERSION } from './migrations';
 import { exportSaveText, importSaveText, readSaveText, writeSaveText } from './storage';
 import { ensureNotificationPermissions, scheduleIn, syncSchedules } from './notifications';
+import {
+  abandonBill,
+  adjournSitting,
+  divide,
+  draftBill,
+  laySI,
+  rewindSitting,
+  settleSitting,
+  startSitting,
+  type DraftInput,
+} from './sitting';
 import { MINISTRY_IDS } from './types';
 import type { EventLogEntry, SaveState } from './types';
 
@@ -32,6 +43,7 @@ export function newGame(seed: number, now: Date = new Date()): SaveState {
     },
     ministries: Object.fromEntries(MINISTRY_IDS.map((id) => [id, { level: 1, xp: 0 }])) as SaveState['ministries'],
     bills: [],
+    sitting: null,
     manifesto: null,
     orders: [],
     gazette: [],
@@ -51,6 +63,7 @@ function toSave(s: GameStore): SaveState {
     player: s.player,
     ministries: s.ministries,
     bills: s.bills,
+    sitting: s.sitting,
     manifesto: s.manifesto,
     orders: s.orders,
     gazette: s.gazette,
@@ -71,6 +84,15 @@ interface GameStore extends SaveState {
   rollDayNow: () => void;
   recordEvent: (entry: EventLogEntry) => void;
   bumpXp: (amount: number) => void;
+  setSittingMinutes: (minutes: number) => void;
+  draftBill: (input: DraftInput) => void;
+  startSitting: (billId: string) => void;
+  adjournSitting: () => void;
+  settleSitting: () => void;
+  divide: (billId: string) => void;
+  laySI: (billId: string) => void;
+  abandonBill: (billId: string) => void;
+  rewindSitting: (seconds: number) => void;
   scheduleTestNotification: (seconds: number) => Promise<string | null>;
   exportSave: () => Promise<boolean>;
   importSave: () => Promise<void>;
@@ -135,6 +157,50 @@ export const useGame = create<GameStore>()((set, get) => ({
     set({ player: { ...p, xp: p.xp + amount }, log: say(get().log, `+${amount} XP.`) });
   },
 
+  setSittingMinutes: (minutes) => {
+    set({ settings: { ...get().settings, sittingMinutes: minutes }, log: say(get().log, `Sitting length set to ${minutes} min.`) });
+  },
+
+  draftBill: (input) => {
+    const r = draftBill(toSave(get()), input, new Date());
+    set({ ...r.state, log: say(get().log, ...r.notes) });
+  },
+
+  startSitting: (billId) => {
+    const r = startSitting(toSave(get()), billId, new Date());
+    set({ ...r.state, log: say(get().log, ...r.notes) });
+  },
+
+  adjournSitting: () => {
+    const r = adjournSitting(toSave(get()), new Date());
+    set({ ...r.state, log: say(get().log, ...r.notes) });
+  },
+
+  settleSitting: () => {
+    const r = settleSitting(toSave(get()), new Date());
+    set({ ...r.state, log: say(get().log, ...r.notes) });
+  },
+
+  divide: (billId) => {
+    const r = divide(toSave(get()), billId, new Date());
+    set({ ...r.state, log: say(get().log, ...r.notes) });
+  },
+
+  laySI: (billId) => {
+    const r = laySI(toSave(get()), billId, new Date());
+    set({ ...r.state, log: say(get().log, ...r.notes) });
+  },
+
+  abandonBill: (billId) => {
+    const r = abandonBill(toSave(get()), billId, new Date());
+    set({ ...r.state, log: say(get().log, ...r.notes) });
+  },
+
+  rewindSitting: (seconds) => {
+    const r = rewindSitting(toSave(get()), seconds);
+    set({ ...r.state, log: say(get().log, ...r.notes) });
+  },
+
   scheduleTestNotification: async (seconds) => {
     const granted = await ensureNotificationPermissions();
     if (!granted) {
@@ -173,11 +239,19 @@ useGame.subscribe((s, prev) => {
   }, 300);
 });
 
-/** Wire the day cycle: boot (hydrate) + AppState→foreground both roll the day. */
+/**
+ * Wire the day cycle + sitting settle: boot (hydrate) and AppState→foreground
+ * both roll the day and settle any elapsed sitting (ADR-0005 — the wall clock
+ * is the source of truth, so a force-quit mid-sitting loses nothing).
+ */
 export function startDayCycle(): () => void {
-  void useGame.getState().hydrate().then(() => useGame.getState().rollDayNow());
+  const onForeground = () => {
+    useGame.getState().rollDayNow();
+    useGame.getState().settleSitting();
+  };
+  void useGame.getState().hydrate().then(onForeground);
   const sub = AppState.addEventListener('change', (next) => {
-    if (next === 'active') useGame.getState().rollDayNow();
+    if (next === 'active') onForeground();
   });
   return () => sub.remove();
 }

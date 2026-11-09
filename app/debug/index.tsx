@@ -14,6 +14,7 @@ const pages: TaskSection[] = [
       { id: 'gaz', title: 'Mock gazette', sub: 'NotificationBanner + Hansard TaskList', chevron: true, onPress: () => router.push('/debug/mock-gazette') },
       { id: 'tre', title: 'Mock treasury', sub: 'StatCards, Figure chart, ledger', chevron: true, onPress: () => router.push('/debug/mock-treasury') },
       { id: 'spike', title: 'Spike: state & persistence', sub: 'Issue #24 PoC — markdown save, migrations, day cycle, notifications', chevron: true, onPress: () => router.push('/debug/spike-state') },
+      { id: 'spike-m3', title: 'Spike: M3 sittings timer', sub: 'Issue #25 PoC — force-quit-proof timer, pipeline, per-clause rewards', chevron: true, onPress: () => router.push('/debug/spike-sitting') },
     ],
   },
 ];
